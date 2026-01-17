@@ -31,7 +31,7 @@ export const oneclickOrientalSecondary = {
 격식 없이 피어난 조선의 민중 미술입니다.`
   },
 
-  'korean-genre': {
+  'korean-pungsokdo': {
     name: '풍속도',
     content: `평범한 하루가 예술이 되었습니다.
 장터의 씨름, 냇가의 빨래, 서당의 낮잠이 담겼습니다.

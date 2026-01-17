@@ -1,7 +1,5 @@
-// PicoArt v68 - ResultScreen
-// 원클릭 교육자료 매칭: educationMatcher.js로 분리 (v51 새로 작성)
-// 2025-12-18 업데이트: 교육자료 매칭 로직 전면 재작성
-// v68: 거장(AI) 대화 기능 추가, 교육 데이터 구조 개선
+// PicoArt v71 - ResultScreen (displayConfig 기반)
+// v71: displayConfig.js 컨트롤 타워 사용
 
 import React, { useState, useEffect, useRef } from 'react';
 import BeforeAfter from './BeforeAfter';
@@ -16,8 +14,9 @@ import { oneclickMastersSecondary } from '../data/oneclickMastersEducation';
 import { oneclickOrientalSecondary } from '../data/oneclickOrientalEducation';
 import { saveToGallery } from './GalleryScreen';
 import { processStyleTransfer } from '../utils/styleTransferAPI';
-// v51: 새로운 교육자료 매칭 유틸리티
-import { getEducationKey, getEducationContent } from '../utils/educationMatcher';
+// v71: displayConfig 컨트롤 타워
+import { normalizeKey, getDisplayInfo, getArtistName } from '../utils/displayConfig';
+import { getEducationKey } from '../utils/educationMatcher';
 
 
 const ResultScreen = ({ 
@@ -896,302 +895,103 @@ const ResultScreen = ({
 
 
   // ========== 거장 화가명 풀네임 + 화파 매핑 (v67: 새 표기 형식) ==========
-  // 제목: 풀네임(영문, 생몰연도)
-  // 부제: 사조(시기)
+  // ========== 거장 표시용 함수 (v71: displayConfig 기반) ==========
   const getMasterInfo = (artistName) => {
-    const masterMap = {
-      // 반 고흐
-      '반 고흐': { fullName: '빈센트 반 고흐(Vincent van Gogh, 1853~1890)', movement: '후기인상주의' },
+    const masterData = {
       'vangogh': { fullName: '빈센트 반 고흐(Vincent van Gogh, 1853~1890)', movement: '후기인상주의' },
-      'van gogh': { fullName: '빈센트 반 고흐(Vincent van Gogh, 1853~1890)', movement: '후기인상주의' },
-      'vincent van gogh': { fullName: '빈센트 반 고흐(Vincent van Gogh, 1853~1890)', movement: '후기인상주의' },
-      
-      // 클림트
-      '클림트': { fullName: '구스타프 클림트(Gustav Klimt, 1862~1918)', movement: '아르누보' },
       'klimt': { fullName: '구스타프 클림트(Gustav Klimt, 1862~1918)', movement: '아르누보' },
-      'gustav klimt': { fullName: '구스타프 클림트(Gustav Klimt, 1862~1918)', movement: '아르누보' },
-      
-      // 뭉크
-      '뭉크': { fullName: '에드바르 뭉크(Edvard Munch, 1863~1944)', movement: '표현주의' },
       'munch': { fullName: '에드바르 뭉크(Edvard Munch, 1863~1944)', movement: '표현주의' },
-      'edvard munch': { fullName: '에드바르 뭉크(Edvard Munch, 1863~1944)', movement: '표현주의' },
-      
-      // 마티스
-      '마티스': { fullName: '앙리 마티스(Henri Matisse, 1869~1954)', movement: '야수파' },
       'matisse': { fullName: '앙리 마티스(Henri Matisse, 1869~1954)', movement: '야수파' },
-      'henri matisse': { fullName: '앙리 마티스(Henri Matisse, 1869~1954)', movement: '야수파' },
-      
-      // 샤갈 (v70 추가)
-      '샤갈': { fullName: '마르크 샤갈(Marc Chagall, 1887~1985)', movement: '초현실주의' },
-      '마르크 샤갈': { fullName: '마르크 샤갈(Marc Chagall, 1887~1985)', movement: '초현실주의' },
       'chagall': { fullName: '마르크 샤갈(Marc Chagall, 1887~1985)', movement: '초현실주의' },
-      'marc chagall': { fullName: '마르크 샤갈(Marc Chagall, 1887~1985)', movement: '초현실주의' },
-      
-      // 피카소
-      '피카소': { fullName: '파블로 피카소(Pablo Picasso, 1881~1973)', movement: '입체주의' },
-      'picasso': { fullName: '파블로 피카소(Pablo Picasso, 1881~1973)', movement: '입체주의' },
-      'pablo picasso': { fullName: '파블로 피카소(Pablo Picasso, 1881~1973)', movement: '입체주의' },
-      
-      // 프리다 칼로
-      '프리다': { fullName: '프리다 칼로(Frida Kahlo, 1907~1954)', movement: '초현실주의' },
-      '프리다 칼로': { fullName: '프리다 칼로(Frida Kahlo, 1907~1954)', movement: '초현실주의' },
       'frida': { fullName: '프리다 칼로(Frida Kahlo, 1907~1954)', movement: '초현실주의' },
-      'frida kahlo': { fullName: '프리다 칼로(Frida Kahlo, 1907~1954)', movement: '초현실주의' },
-      
-      // 리히텐슈타인
-      '리히텐슈타인': { fullName: '로이 리히텐슈타인(Roy Lichtenstein, 1923~1997)', movement: '팝아트' },
-      '로이 리히텐슈타인': { fullName: '로이 리히텐슈타인(Roy Lichtenstein, 1923~1997)', movement: '팝아트' },
-      'lichtenstein': { fullName: '로이 리히텐슈타인(Roy Lichtenstein, 1923~1997)', movement: '팝아트' },
-      'roy lichtenstein': { fullName: '로이 리히텐슈타인(Roy Lichtenstein, 1923~1997)', movement: '팝아트' }
+      'lichtenstein': { fullName: '로이 리히텐슈타인(Roy Lichtenstein, 1923~1997)', movement: '팝아트' }
     };
     
     if (!artistName) return { fullName: '거장', movement: '' };
-    
-    const normalized = artistName.toLowerCase().trim();
-    
-    // 직접 매핑 확인
-    if (masterMap[artistName]) return masterMap[artistName];
-    if (masterMap[normalized]) return masterMap[normalized];
-    
-    // 부분 매칭
-    for (const [key, value] of Object.entries(masterMap)) {
-      if (normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)) {
-        return value;
-      }
-    }
-    
-    return { fullName: artistName, movement: '' };
+    const key = normalizeKey(artistName);
+    return masterData[key] || { fullName: artistName, movement: '' };
   };
 
-  // ========== 미술사조 표시용 함수 (v67: 새 표기 형식) ==========
-  // 제목: 사조(영문, 시기)
-  // 부제: 화가명(생몰연도)
+  // ========== 미술사조 표시용 함수 (v71: displayConfig 기반) ==========
   const getMovementDisplayInfo = (styleName, artistName) => {
-    // 사조별 영문명, 시기
-    const movementInfo = {
-      '고대': { en: 'Ancient', period: 'BC~AD 4세기' },
+    // 사조 정보
+    const movementData = {
+      '고대': { en: 'Greco-Roman', period: 'BC~AD 4세기' },
       '그리스·로마': { en: 'Greco-Roman', period: 'BC~AD 4세기' },
       '중세': { en: 'Medieval', period: '5~15세기' },
       '중세 미술': { en: 'Medieval', period: '5~15세기' },
       '르네상스': { en: 'Renaissance', period: '14~16세기' },
       '바로크': { en: 'Baroque', period: '17~18세기' },
       '로코코': { en: 'Rococo', period: '18세기' },
+      '신고전 vs 낭만 vs 사실주의': { en: 'Neoclassicism·Romanticism·Realism', period: '18~19세기' },
       '신고전주의': { en: 'Neoclassicism', period: '18~19세기' },
       '낭만주의': { en: 'Romanticism', period: '19세기' },
       '사실주의': { en: 'Realism', period: '19세기' },
-      '신고전 vs 낭만 vs 사실주의': { en: 'Neoclassicism·Romanticism·Realism', period: '18~19세기' },
       '인상주의': { en: 'Impressionism', period: '19세기 말' },
       '후기인상주의': { en: 'Post-Impressionism', period: '19세기 말' },
       '야수파': { en: 'Fauvism', period: '20세기 초' },
       '표현주의': { en: 'Expressionism', period: '20세기 초' },
-      '아르누보': { en: 'Art Nouveau', period: '19세기 말' },
       '20세기 모더니즘': { en: 'Modernism', period: '20세기' },
-      // 20세기 모더니즘 세부 사조
       '입체주의': { en: 'Cubism', period: '20세기 초' },
       '초현실주의': { en: 'Surrealism', period: '20세기 초중반' },
-      '팝아트': { en: 'Pop Art', period: '20세기 중반' },
+      '팝아트': { en: 'Pop Art', period: '20세기 중반' }
     };
     
-    // 화가별 풀네임, 생몰연도
-    const artistInfo = {
-      // 고대
-      'greek sculpture': { name: '고대 그리스 조각', years: '' },
-      'classical sculpture': { name: '고대 그리스 조각', years: '' },
-      'roman mosaic': { name: '로마 모자이크', years: '' },
-      // 중세
-      'byzantine': { name: '비잔틴', years: '' },
-      'byzantine art': { name: '비잔틴', years: '' },
-      'gothic': { name: '고딕', years: '' },
-      'gothic art': { name: '고딕', years: '' },
-      'gothic stained glass': { name: '고딕 스테인드글라스', years: '' },
-      'islamic miniature': { name: '이슬람 세밀화', years: '' },
-      'persian miniature': { name: '페르시아 세밀화', years: '' },
-      // 르네상스
-      'leonardo': { name: '레오나르도 다 빈치', years: '1452~1519' },
-      'leonardo da vinci': { name: '레오나르도 다 빈치', years: '1452~1519' },
-      'michelangelo': { name: '미켈란젤로 부오나로티', years: '1475~1564' },
-      'raphael': { name: '라파엘로 산치오', years: '1483~1520' },
-      'botticelli': { name: '산드로 보티첼리', years: '1445~1510' },
-      'titian': { name: '티치아노 베첼리오', years: '1488~1576' },
-      // 바로크
-      'caravaggio': { name: '미켈란젤로 메리시 다 카라바조', years: '1571~1610' },
-      'rembrandt': { name: '렘브란트 판 레인', years: '1606~1669' },
-      'velazquez': { name: '디에고 벨라스케스', years: '1599~1660' },
-      'velázquez': { name: '디에고 벨라스케스', years: '1599~1660' },
-      'rubens': { name: '피터 파울 루벤스', years: '1577~1640' },
-      // 로코코
-      'watteau': { name: '장 앙투안 와토', years: '1684~1721' },
-      'boucher': { name: '프랑수아 부셰', years: '1703~1770' },
-      'françois boucher': { name: '프랑수아 부셰', years: '1703~1770' },
-      'fragonard': { name: '장 오노레 프라고나르', years: '1732~1806' },
-      // 신고전주의
-      'david': { name: '자크 루이 다비드', years: '1748~1825' },
-      'jacques-louis david': { name: '자크 루이 다비드', years: '1748~1825' },
-      'ingres': { name: '장 오귀스트 도미니크 앵그르', years: '1780~1867' },
-      'jean-auguste-dominique ingres': { name: '장 오귀스트 도미니크 앵그르', years: '1780~1867' },
-      // 낭만주의
-      'delacroix': { name: '외젠 들라크루아', years: '1798~1863' },
-      'eugène delacroix': { name: '외젠 들라크루아', years: '1798~1863' },
-      'eugene delacroix': { name: '외젠 들라크루아', years: '1798~1863' },
-      'turner': { name: '조지프 말러드 윌리엄 터너', years: '1775~1851' },
-      'j.m.w. turner': { name: '조지프 말러드 윌리엄 터너', years: '1775~1851' },
-      'joseph mallord william turner': { name: '조지프 말러드 윌리엄 터너', years: '1775~1851' },
-      'goya': { name: '프란시스코 고야', years: '1746~1828' },
-      'francisco goya': { name: '프란시스코 고야', years: '1746~1828' },
-      'francisco de goya': { name: '프란시스코 고야', years: '1746~1828' },
-      // 사실주의
-      'courbet': { name: '귀스타브 쿠르베', years: '1819~1877' },
-      'gustave courbet': { name: '귀스타브 쿠르베', years: '1819~1877' },
-      'millet': { name: '장 프랑수아 밀레', years: '1814~1875' },
-      'jean-françois millet': { name: '장 프랑수아 밀레', years: '1814~1875' },
-      'jean-francois millet': { name: '장 프랑수아 밀레', years: '1814~1875' },
-      // 인상주의
-      'monet': { name: '클로드 모네', years: '1840~1926' },
-      'claude monet': { name: '클로드 모네', years: '1840~1926' },
-      'renoir': { name: '피에르 오귀스트 르누아르', years: '1841~1919' },
-      'pierre-auguste renoir': { name: '피에르 오귀스트 르누아르', years: '1841~1919' },
-      'degas': { name: '에드가 드가', years: '1834~1917' },
-      'manet': { name: '에두아르 마네', years: '1832~1883' },
-      'morisot': { name: '베르트 모리조', years: '1841~1895' },
-      'berthe morisot': { name: '베르트 모리조', years: '1841~1895' },
-      'caillebotte': { name: '귀스타브 카유보트', years: '1848~1894' },
-      'gustave caillebotte': { name: '귀스타브 카유보트', years: '1848~1894' },
-      // 후기인상주의
-      'van gogh': { name: '빈센트 반 고흐', years: '1853~1890' },
-      'vincent van gogh': { name: '빈센트 반 고흐', years: '1853~1890' },
-      'gauguin': { name: '폴 고갱', years: '1848~1903' },
-      'paul gauguin': { name: '폴 고갱', years: '1848~1903' },
-      'cezanne': { name: '폴 세잔', years: '1839~1906' },
-      'cézanne': { name: '폴 세잔', years: '1839~1906' },
-      // 야수파
-      'matisse': { name: '앙리 마티스', years: '1869~1954' },
-      'henri matisse': { name: '앙리 마티스', years: '1869~1954' },
-      'derain': { name: '앙드레 드랭', years: '1880~1954' },
-      'andré derain': { name: '앙드레 드랭', years: '1880~1954' },
-      'andre derain': { name: '앙드레 드랭', years: '1880~1954' },
-      'vlaminck': { name: '모리스 드 블라맹크', years: '1876~1958' },
-      'maurice de vlaminck': { name: '모리스 드 블라맹크', years: '1876~1958' },
-      // 표현주의
-      'munch': { name: '에드바르 뭉크', years: '1863~1944' },
-      'edvard munch': { name: '에드바르 뭉크', years: '1863~1944' },
-      'kirchner': { name: '에른스트 루트비히 키르히너', years: '1880~1938' },
-      'ernst ludwig kirchner': { name: '에른스트 루트비히 키르히너', years: '1880~1938' },
-      'kokoschka': { name: '오스카 코코슈카', years: '1886~1980' },
-      'oskar kokoschka': { name: '오스카 코코슈카', years: '1886~1980' },
-      // 20세기 모더니즘 (워홀 제거)
-      'picasso': { name: '파블로 피카소', years: '1881~1973' },
-      'pablo picasso': { name: '파블로 피카소', years: '1881~1973' },
-      'lichtenstein': { name: '로이 리히텐슈타인', years: '1923~1997' },
-      'roy lichtenstein': { name: '로이 리히텐슈타인', years: '1923~1997' },
-      'haring': { name: '키스 해링', years: '1958~1990' },
-      'keith haring': { name: '키스 해링', years: '1958~1990' },
-      'miro': { name: '호안 미로', years: '1893~1983' },
-      'miró': { name: '호안 미로', years: '1893~1983' },
-      'joan miro': { name: '호안 미로', years: '1893~1983' },
-      'joan miró': { name: '호안 미로', years: '1893~1983' },
-      'magritte': { name: '르네 마그리트', years: '1898~1967' },
-      'rené magritte': { name: '르네 마그리트', years: '1898~1967' },
-      'rene magritte': { name: '르네 마그리트', years: '1898~1967' },
-      'chagall': { name: '마르크 샤갈', years: '1887~1985' },
-      'marc chagall': { name: '마르크 샤갈', years: '1887~1985' },
+    // 화가 정보
+    const artistData = {
+      'classical-sculpture': '그리스 조각', 'roman-mosaic': '로마 모자이크',
+      'byzantine': '비잔틴', 'gothic': '고딕', 'islamic-miniature': '이슬람 세밀화',
+      'leonardo': '레오나르도 다 빈치', 'michelangelo': '미켈란젤로', 'raphael': '라파엘로',
+      'botticelli': '보티첼리', 'titian': '티치아노',
+      'caravaggio': '카라바조', 'rembrandt': '렘브란트', 'velazquez': '벨라스케스', 'rubens': '루벤스',
+      'watteau': '와토', 'boucher': '부셰',
+      'david': '다비드', 'ingres': '앵그르', 'turner': '터너', 'delacroix': '들라크루아',
+      'courbet': '쿠르베', 'manet': '마네',
+      'monet': '모네', 'renoir': '르누아르', 'degas': '드가', 'caillebotte': '카유보트',
+      'vangogh': '반 고흐', 'gauguin': '고갱', 'cezanne': '세잔',
+      'matisse': '마티스', 'derain': '드랭', 'vlaminck': '블라맹크',
+      'munch': '뭉크', 'kirchner': '키르히너', 'kokoschka': '코코슈카',
+      'picasso': '피카소', 'magritte': '마그리트', 'miro': '미로', 'chagall': '샤갈', 'lichtenstein': '리히텐슈타인'
     };
     
-    // 제목 생성: 사조(영문, 시기)
+    // 사조 결정
     let actualMovement = styleName;
-    
-    // "신고전 vs 낭만 vs 사실주의"인 경우 화가에 따라 사조 결정
-    if (styleName === '신고전 vs 낭만 vs 사실주의' && artistName) {
-      const normalized = artistName.toLowerCase().trim();
-      // 신고전주의 화가
-      if (['david', 'jacques-louis david', 'ingres', 'jean-auguste-dominique ingres'].includes(normalized)) {
-        actualMovement = '신고전주의';
+    if (artistName) {
+      const key = normalizeKey(artistName);
+      if (styleName === '신고전 vs 낭만 vs 사실주의') {
+        if (['david', 'ingres'].includes(key)) actualMovement = '신고전주의';
+        else if (['delacroix', 'turner'].includes(key)) actualMovement = '낭만주의';
+        else if (['courbet', 'manet'].includes(key)) actualMovement = '사실주의';
       }
-      // 낭만주의 화가
-      else if (['delacroix', 'eugène delacroix', 'eugene delacroix', 'turner', 'j.m.w. turner', 'joseph mallord william turner'].includes(normalized)) {
-        actualMovement = '낭만주의';
-      }
-      // 사실주의 화가
-      else if (['courbet', 'gustave courbet', 'manet', 'édouard manet', 'edouard manet'].includes(normalized)) {
-        actualMovement = '사실주의';
+      if (styleName === '20세기 모더니즘') {
+        if (key === 'picasso') actualMovement = '입체주의';
+        else if (['magritte', 'miro', 'chagall'].includes(key)) actualMovement = '초현실주의';
+        else if (key === 'lichtenstein') actualMovement = '팝아트';
       }
     }
     
-    // "20세기 모더니즘"인 경우 화가에 따라 사조 결정
-    if (styleName === '20세기 모더니즘' && artistName) {
-      const normalized = artistName.toLowerCase().trim();
-      // 입체주의 화가
-      if (['picasso', 'pablo picasso'].includes(normalized)) {
-        actualMovement = '입체주의';
-      }
-      // 초현실주의 화가
-      else if (['magritte', 'rené magritte', 'rene magritte', 'miro', 'miró', 'joan miro', 'joan miró', 'chagall', 'marc chagall'].includes(normalized)) {
-        actualMovement = '초현실주의';
-      }
-      // 팝아트 화가 (워홀 제거)
-      else if (['lichtenstein', 'roy lichtenstein', 'haring', 'keith haring'].includes(normalized)) {
-        actualMovement = '팝아트';
-      }
-    }
-    
-    const mvInfo = movementInfo[actualMovement] || { en: styleName, period: '' };
+    const mvInfo = movementData[actualMovement] || { en: styleName, period: '' };
     const title = mvInfo.period ? `${actualMovement}(${mvInfo.en}, ${mvInfo.period})` : `${actualMovement}(${mvInfo.en})`;
     
-    // 부제 생성: 화가명만 (생몰연도 제거)
-    const normalized = artistName ? artistName.toLowerCase().trim() : '';
-    const artInfo = artistInfo[normalized] || { name: artistName, years: '' };
-    const subtitle = artInfo.name;
+    const artistKey = artistName ? normalizeKey(artistName) : '';
+    const subtitle = artistData[artistKey] || artistName || '';
     
     return { title, subtitle };
   };
 
-  // ========== 동양화 표시용 함수 (v67: 새 표기 형식) ==========
-  // 제목: 국가 전통회화(영문)
-  // 부제: 스타일(영문)
+  // ========== 동양화 표시용 함수 (v71: displayConfig 기반) ==========
   const getOrientalDisplayInfo = (artistName) => {
-    const orientalMap = {
-      // 한국
-      'korean minhwa': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '민화', en: 'Minhwa' },
-      'korean pungsokdo': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '풍속도', en: 'Pungsokdo' },
-      'korean jingyeong': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '진경산수화', en: 'Jingyeong' },
-      '민화': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '민화', en: 'Minhwa' },
-      '풍속화': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '풍속도', en: 'Pungsokdo' },
-      '풍속도': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '풍속도', en: 'Pungsokdo' },
-      '진경산수': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '진경산수화', en: 'Jingyeong' },
-      '진경산수화': { country: '한국 전통회화', countryEn: 'Korean Traditional Painting', style: '진경산수화', en: 'Jingyeong' },
-      // 중국
-      'chinese gongbi': { country: '중국 전통회화', countryEn: 'Chinese Traditional Painting', style: '공필화', en: 'Gongbi' },
-      'chinese ink wash': { country: '중국 전통회화', countryEn: 'Chinese Traditional Painting', style: '수묵화', en: 'Ink Wash' },
-      '공필화': { country: '중국 전통회화', countryEn: 'Chinese Traditional Painting', style: '공필화', en: 'Gongbi' },
-      '수묵화': { country: '중국 전통회화', countryEn: 'Chinese Traditional Painting', style: '수묵화', en: 'Ink Wash' },
-      // 일본
-      'japanese ukiyo-e': { country: '일본 전통회화', countryEn: 'Japanese Traditional Painting', style: '우키요에', en: 'Ukiyo-e' },
-      '우키요에': { country: '일본 전통회화', countryEn: 'Japanese Traditional Painting', style: '우키요에', en: 'Ukiyo-e' },
-      '일본 우키요에': { country: '일본 전통회화', countryEn: 'Japanese Traditional Painting', style: '우키요에', en: 'Ukiyo-e' },
+    const orientalData = {
+      'korean-minhwa': { title: '한국 전통회화(Korean Traditional Painting)', subtitle: '민화(Minhwa)' },
+      'korean-pungsokdo': { title: '한국 전통회화(Korean Traditional Painting)', subtitle: '풍속도(Pungsokdo)' },
+      'korean-jingyeong': { title: '한국 전통회화(Korean Traditional Painting)', subtitle: '진경산수화(Jingyeong)' },
+      'chinese-ink': { title: '중국 전통회화(Chinese Traditional Painting)', subtitle: '수묵화(Ink Wash)' },
+      'chinese-gongbi': { title: '중국 전통회화(Chinese Traditional Painting)', subtitle: '공필화(Gongbi)' },
+      'japanese-ukiyoe': { title: '일본 전통회화(Japanese Traditional Painting)', subtitle: '우키요에(Ukiyo-e)' }
     };
     
-    const normalized = artistName ? artistName.toLowerCase().trim() : '';
-    
-    // 직접 매핑
-    let info = orientalMap[normalized] || orientalMap[artistName];
-    
-    // 부분 매칭
-    if (!info) {
-      for (const [key, value] of Object.entries(orientalMap)) {
-        if (normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)) {
-          info = value;
-          break;
-        }
-      }
-    }
-    
-    if (info) {
-      return { 
-        title: `${info.country}(${info.countryEn})`, 
-        subtitle: `${info.style}(${info.en})` 
-      };
-    }
-    
-    return { title: '동양화', subtitle: artistName || '' };
+    const key = normalizeKey(artistName);
+    return orientalData[key] || { title: '동양화', subtitle: artistName || '' };
   };
 
   // ========== 갤러리용 짧은 이름 포맷: 한글(영문) ==========
