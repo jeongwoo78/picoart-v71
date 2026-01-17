@@ -31,7 +31,7 @@ export const oneclickMovementsPrimary = {
 export const oneclickMovementsSecondary = {
 
   // ----- 고대 그리스-로마 -----
-  'ancient-greek-sculpture': {
+  'classical-sculpture': {
     name: '고대 그리스 조각',
     content: `인체의 완벽한 비례를 탐구한 시대입니다.
 콘트라포스토와 황금비율이 조각의 기준이 되었습니다.

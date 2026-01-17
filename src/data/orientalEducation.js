@@ -92,7 +92,7 @@ export const orientalEducation = {
   
   // ========== 한국 ==========
   
-  korean_minhwa: {
+  'korean-minhwa': {
     name: '민화',
     style: 'minhwa',
     description: `민중은 삶의 소망을 그림에 담았습니다.
@@ -101,7 +101,7 @@ export const orientalEducation = {
 집집마다 걸렸던 조선의 생활 미술입니다.`
   },
   
-  korean_genre: {
+  'korean-pungsokdo': {
     name: '풍속도',
     style: 'genre_painting',
     description: `화가는 민중의 일상을 화폭에 담았습니다.
@@ -110,7 +110,7 @@ export const orientalEducation = {
 붓끝으로 민중의 삶을 기록한 조선의 리얼리즘입니다.`
   },
   
-  korean_jingyeong: {
+  'korean-jingyeong': {
     name: '진경산수화',
     style: 'true_view_landscape',
     description: `화가는 조선의 실제 산천을 직접 보고 그렸습니다.
@@ -122,7 +122,7 @@ export const orientalEducation = {
   
   // ========== 중국 ==========
   
-  chinese_ink: {
+  'chinese-ink': {
     name: '수묵화',
     style: 'ink_wash',
     description: `문인은 먹의 농담만으로 세상을 그렸습니다.
@@ -131,7 +131,7 @@ export const orientalEducation = {
 천 년 문인화의 정수입니다.`
   },
   
-  chinese_gongbi: {
+  'chinese-gongbi': {
     name: '공필화',
     style: 'gongbi',
     description: `궁정 화가는 붓끝으로 정밀함을 추구했습니다.
@@ -140,7 +140,7 @@ export const orientalEducation = {
 황제의 눈을 사로잡은 동양 세밀화의 정점입니다.`
   },
   
-  chinese_huaniao: {
+  'chinese-huaniao': {
     name: '화조화',
     style: 'bird_and_flower',
     description: `꽃과 새, 나비와 물고기에 길상의 의미를 담았습니다.
@@ -152,7 +152,7 @@ export const orientalEducation = {
   
   // ========== 일본 ==========
   
-  japanese_ukiyoe: {
+  'japanese-ukiyoe': {
     name: '우키요에',
     style: 'ukiyoe',
     description: `떠도는 세상의 아름다움을 목판에 새겼습니다.

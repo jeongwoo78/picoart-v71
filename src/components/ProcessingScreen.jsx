@@ -1,6 +1,6 @@
-// PicoArt v51 - ProcessingScreen (단일변환 반복 = 원클릭)
+// PicoArt v71 - ProcessingScreen (displayConfig 기반)
 // 원칙: 단일 변환 로직만 있고, 원클릭은 그걸 N번 반복
-// v51: educationMatcher.js 사용 (ResultScreen과 동일한 매칭 로직)
+// v71: displayConfig.js 컨트롤 타워 사용
 import React, { useEffect, useState } from 'react';
 import { processStyleTransfer } from '../utils/styleTransferAPI';
 import { educationContent } from '../data/educationContent';
@@ -8,8 +8,9 @@ import { educationContent } from '../data/educationContent';
 import { oneclickMovementsPrimary, oneclickMovementsSecondary } from '../data/oneclickMovementsEducation';
 import { oneclickMastersPrimary, oneclickMastersSecondary } from '../data/oneclickMastersEducation';
 import { oneclickOrientalPrimary, oneclickOrientalSecondary } from '../data/oneclickOrientalEducation';
-// v51: 새로운 교육자료 매칭 유틸리티 (ResultScreen과 동일)
-import { getEducationKey, getEducationContent } from '../utils/educationMatcher';
+// v71: displayConfig 컨트롤 타워
+import { normalizeKey, getDisplayInfo, getArtistName } from '../utils/displayConfig';
+import { getEducationKey } from '../utils/educationMatcher';
 
 const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
   const [statusText, setStatusText] = useState('준비 중...');

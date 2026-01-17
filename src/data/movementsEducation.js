@@ -15,7 +15,7 @@
 // [다국어 변환 시 수정 필요]
 export const artistFullNames = {
   // 그리스·로마 (스타일)
-  'ancient-greek-sculpture': '고대 그리스 조각',
+  'classical-sculpture': '고대 그리스 조각',
   'roman-mosaic': '로마 모자이크',
   
   // 중세 (스타일)
@@ -81,13 +81,13 @@ export const artistFullNames = {
 // ========== 기본정보 ==========
 // [다국어 변환 시 수정 필요] - loading.subtitle(성), result용 풀네임은 artistFullNames 참조
 export const movementsBasicInfo = {
-  'ancient': {
+  'greco-roman': {
     loading: {
       name: '그리스·로마(Ancient Greek & Roman, BC 800~AD 500)',
       subtitle: '고대 그리스 조각 · 로마 모자이크'
     }
   },
-  'medieval': {
+  'medieval-art': {
     loading: {
       name: '중세 미술(Medieval Art, 4~14세기)',
       subtitle: '비잔틴 · 고딕 · 이슬람 세밀화'
@@ -111,7 +111,7 @@ export const movementsBasicInfo = {
       subtitle: '와토 · 부셰'
     }
   },
-  'neoclassicism_vs_romanticism_vs_realism': {
+  'neoclassicism-romanticism-realism': {
     loading: {
       name: '신고전·낭만·사실주의(19세기)',
       subtitle: '다비드 · 들라크루아 · 쿠르베'
@@ -123,7 +123,7 @@ export const movementsBasicInfo = {
       subtitle: '모네 · 르누아르 · 드가'
     }
   },
-  'postImpressionism': {
+  'post-impressionism': {
     loading: {
       name: '후기인상주의(Post-Impressionism, 19세기 말)',
       subtitle: '반 고흐 · 고갱 · 세잔'
@@ -151,7 +151,7 @@ export const movementsBasicInfo = {
 
 // ========== 1차 교육: 사조 로딩 (Overview) ==========
 export const movementsOverview = {
-  ancient: {
+  'greco-roman': {
     title: '고대 그리스·로마',
     desc: `인간의 몸이 처음으로 질문이 되었습니다.
 기원전 800년, 그리스인들은 완벽한 인체를 탐구하기 시작했습니다.
@@ -159,7 +159,7 @@ export const movementsOverview = {
 서양 미술 2,500년의 출발점입니다.`
   },
   
-  medieval: {
+  'medieval-art': {
     title: '중세 미술',
     desc: `예술의 시선이 인간에서 신으로 향했습니다.
 4세기, 로마 제국이 기독교를 받아들이며 중심이 바뀌었습니다.
@@ -191,7 +191,7 @@ export const movementsOverview = {
 혁명 전야, 찬란함의 마지막 순간이었습니다.`
   },
   
-  neoclassicism_vs_romanticism_vs_realism: {
+  'neoclassicism-romanticism-realism': {
     title: '신고전·낭만·사실주의',
     desc: `혁명이 예술의 방향을 갈랐습니다.
 19세기, 이성과 감정, 현실은 세 갈래로 나뉘었습니다.
@@ -207,7 +207,7 @@ export const movementsOverview = {
 미술관을 벗어나 살아 있는 빛을 좇은 혁명이었습니다.`
   },
   
-  postImpressionism: {
+  'post-impressionism': {
     title: '후기인상주의',
     desc: `인상을 넘어, 내면으로 들어갔습니다.
 19세기 말, 화가들은 보이는 것 너머를 그리기 시작했습니다.
@@ -245,7 +245,7 @@ export const movementsOverview = {
 export const movementsEducation = {
   
   // ========== 고대 그리스-로마 ==========
-  'ancient-greek-sculpture': {
+  'classical-sculpture': {
     name: '고대 그리스 조각',
     description: `그리스 조각은 인체의 이상적 아름다움을 증명하려는 예술이었습니다.
 자연스러운 균형을 만든 콘트라포스토와 황금비율이 핵심입니다.
